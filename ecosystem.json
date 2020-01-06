@@ -17,5 +17,15 @@
       "out_file": "./logs/app-out.log",
       "log_date_format": "YYYY-MM-DD HH:mm Z"
     }
-  ]
+  ],
+  "deploy": {
+    "production": {
+      "user": "ty",
+      "host": "39.105.35.4",
+      "ref": "origin/master",
+      "repo": "git@github.com:taleyoung/server-koa.git",
+      "path": "/home/ty/project/server-koa",
+      "post-deploy": "npm install && pm2 reload ecosystem.config.js --env production"
+    }
+  }
 }

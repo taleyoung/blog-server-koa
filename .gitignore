@@ -13,6 +13,9 @@
 build
 dist
 
+#log
+logs
+
 # misc
 .DS_Store
 .env.local
