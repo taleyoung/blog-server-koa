@@ -8,7 +8,8 @@ const getArticleList = async (
   const _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, article.created_at createdAt
                 FROM tag, article,tag_article
                 WHERE tag.id IN (
-                    SELECT tag_article.tag_id
+                    SELECT tag.id
+                    FROM tag
                     WHERE tag_article.article_id = article.id
                       AND tag_article.tag_id = tag.id
                     )
@@ -21,12 +22,13 @@ const getArticleList = async (
 const getArticleById = async (id: number) => {
   let _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, article.created_at createdAt
               FROM tag, article,tag_article
-              WHERE tag.id IN (
-                  SELECT tag_article.tag_id
-                  WHERE tag_article.article_id = article.id
-                    AND tag_article.tag_id = tag.id
-                    AND article.id=?
-                  )
+              WHERE article.id=?
+                AND tag.id IN (
+                    SELECT tag.id
+                    FROM tag
+                    WHERE tag_article.article_id = article.id
+                      AND tag_article.tag_id = tag.id
+                    )
               GROUP BY article.id`;
 
   return db.query(_sql, [id]);
