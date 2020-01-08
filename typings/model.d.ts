@@ -2,6 +2,7 @@ export interface ArticleScheme {
   id: string;
   title: string;
   content: string;
+  category: string;
   updatedAt: string;
   tags?: Array<string>;
 }

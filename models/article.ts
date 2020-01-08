@@ -3,24 +3,42 @@ import * as db from "../utils/db-util";
 const getArticleList = async (
   limit: number,
   offset: number,
-  desc?: boolean
+  desc?: boolean,
+  cate?: string
 ) => {
-  const _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, article.created_at createdAt
-                FROM tag, article,tag_article
-                WHERE tag.id IN (
-                    SELECT tag.id
-                    FROM tag
-                    WHERE tag_article.article_id = article.id
-                      AND tag_article.tag_id = tag.id
-                    )
-                GROUP BY article.id
-                ORDER BY article.created_at DESC
-                LIMIT ? OFFSET ?;`;
-  return db.query(_sql, [limit, offset]);
+  console.log("cate :", cate, limit, offset, desc);
+  if (cate) {
+    const _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, category, article.created_at createdAt
+            FROM tag, article, tag_article
+            WHERE article.category=?
+              AND tag.id IN (
+                  SELECT tag.id
+                  FROM tag
+                  WHERE tag_article.article_id = article.id
+                    AND tag_article.tag_id = tag.id
+                  )
+            GROUP BY article.id
+            ORDER BY article.created_at DESC
+            LIMIT ? OFFSET ?;`;
+    return db.query(_sql, [cate, limit, offset]);
+  } else {
+    const _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, category, article.created_at createdAt
+              FROM tag, article,tag_article
+              WHERE tag.id IN (
+                  SELECT tag.id
+                  FROM tag
+                  WHERE tag_article.article_id = article.id
+                    AND tag_article.tag_id = tag.id
+                  )
+              GROUP BY article.id
+              ORDER BY article.created_at DESC
+              LIMIT ? OFFSET ?;`;
+    return db.query(_sql, [limit, offset]);
+  }
 };
 
 const getArticleById = async (id: number) => {
-  let _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, article.created_at createdAt
+  let _sql = `SELECT article.id, title, content, group_concat(tag.name) tags, category, article.created_at createdAt
               FROM tag, article,tag_article
               WHERE article.id=?
                 AND tag.id IN (
@@ -34,9 +52,9 @@ const getArticleById = async (id: number) => {
   return db.query(_sql, [id]);
 };
 
-const insert = async (title: string, content: string) => {
-  const _sql = `INSERT INTO article(title, content) VALUES(?, ?)`;
-  return db.query(_sql, [title, content]);
+const insert = async (title: string, content: string, category: string) => {
+  const _sql = `INSERT INTO article(title, content, category) VALUES(?, ?,?)`;
+  return db.query(_sql, [title, content, category]);
 };
 
 const update = async (id: number, title: string, content: string) => {

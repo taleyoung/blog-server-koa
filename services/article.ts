@@ -6,6 +6,7 @@ interface ArticleModel {
   id: string;
   title: string;
   content: string;
+  category: string;
   updated_at: dayjs.ConfigType;
   tags: { split: (arg0: string) => string[] };
 }
@@ -13,14 +14,16 @@ interface ArticleModel {
 const getArticleList = async (
   page: number = 1,
   page_size: number = 10,
-  order: "DESC" | "ASC" = "DESC"
+  order: "DESC" | "ASC" = "DESC",
+  cate?: string
 ) => {
   try {
     const offset = (page - 1) * page_size;
     const res: Array<ArticleModel> = await articleModel.getArticleList(
       page_size,
       offset,
-      true
+      true,
+      cate
     );
     let list: Array<ArticleScheme> = [];
     res.forEach(item => {
@@ -28,6 +31,7 @@ const getArticleList = async (
         id: item.id,
         title: item.title,
         content: item.content.slice(0, 60) + "...",
+        category: item.category,
         updatedAt: dayjs(item.updated_at).format("YYYY-MM-DD HH:MM"),
         tags: item.tags.split(",")
       });
@@ -45,6 +49,7 @@ const getArticleDetail = async (id: number) => {
       id: res[0].id,
       title: res[0].title,
       content: res[0].content,
+      category: res[0].category,
       updatedAt: dayjs(res[0].updated_at).format("YYYY-MM-DD HH:MM"),
       tags: res[0].tags.split(",")
     };
@@ -57,10 +62,11 @@ const getArticleDetail = async (id: number) => {
 const insertArticle = async (
   title: string,
   content: string,
+  category: string,
   tags: Array<string>
 ) => {
   try {
-    const res = await articleModel.insert(title, content);
+    const res = await articleModel.insert(title, content, category);
     await Promise.all(
       tags.map(async tag => {
         await articleModel.addTagArticle(tag, res.insertId);

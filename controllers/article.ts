@@ -6,10 +6,17 @@ export default class ArticleController {
   static async show(ctx: Koa.DefaultContext) {
     try {
       const { id } = ctx.params;
-      const { page, page_size, order } = ctx.request.body;
+      const { page, page_size, order, cate } = ctx.request.query;
+      console.log("TTTobject", ctx.request.query);
+      console.log("TTTcate", cate);
       const res = id
         ? await articleService.getArticleDetail(parseInt(id))
-        : await articleService.getArticleList(page, page_size, order);
+        : await articleService.getArticleList(
+            parseInt(page),
+            parseInt(page_size),
+            order,
+            cate
+          );
       returnBody(ctx, 200, res);
     } catch (error) {
       returnBody(ctx, 404);
@@ -18,8 +25,13 @@ export default class ArticleController {
 
   static async add(ctx: Koa.DefaultContext) {
     try {
-      const { title, content, tags } = ctx.request.body;
-      const res = await articleService.insertArticle(title, content, tags);
+      const { title, content, category, tags } = ctx.request.body;
+      const res = await articleService.insertArticle(
+        title,
+        content,
+        tags,
+        category
+      );
       returnBody(ctx, 200, res);
     } catch (error) {
       returnBody(ctx, 404);
