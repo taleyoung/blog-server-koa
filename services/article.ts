@@ -1,4 +1,5 @@
 import * as articleModel from "../models/article";
+import * as tagModel from "../models/tag";
 import dayjs from "dayjs";
 import { ArticleScheme } from "../typings/model";
 
@@ -9,6 +10,12 @@ interface ArticleModel {
   category: string;
   updated_at: dayjs.ConfigType;
   tags: { split: (arg0: string) => string[] };
+}
+
+interface Brief {
+  id: number;
+  title: string;
+  createAt: string;
 }
 
 const getArticleList = async (
@@ -32,13 +39,48 @@ const getArticleList = async (
         title: item.title,
         content: item.content.slice(0, 60) + "...",
         category: item.category,
-        updatedAt: dayjs(item.updated_at).format("YYYY-MM-DD HH:MM"),
+        updatedAt: dayjs(item.updated_at).format("YYYY-MM-DD"),
         tags: item.tags.split(",")
       });
     });
-    return { data: list };
+    const total = await articleModel.getArticleCount(cate);
+    return { data: list, total: total[0].num };
   } catch (error) {
     console.log("error", error);
+  }
+};
+
+const getBriefList = async (page: number = 1, page_size: number = 10) => {
+  try {
+    const offset = (page - 1) * page_size;
+    const res = await articleModel.getBrief(page_size, offset);
+    let list: Array<Brief> = [];
+    res.forEach((item: Brief) => {
+      list.push({
+        ...item,
+        createAt: dayjs(item.createAt).format("YYYY-MM-DD")
+      });
+    });
+    const total = await articleModel.getArticleCount();
+    return { data: list, total: total[0].num };
+  } catch (error) {
+    console.log("error :", error);
+  }
+};
+
+const getCurrent = async () => {
+  try {
+    const res = await articleModel.getBrief(5, 0);
+    let list: Array<Brief> = [];
+    res.forEach((item: Brief) => {
+      list.push({
+        ...item,
+        createAt: dayjs(item.createAt).format("YYYY-MM-DD")
+      });
+    });
+    return list;
+  } catch (error) {
+    console.log("error :", error);
   }
 };
 
@@ -63,17 +105,15 @@ const insertArticle = async (
   title: string,
   content: string,
   category: string,
-  tags: Array<string>
+  tag: string
 ) => {
   try {
     const res = await articleModel.insert(title, content, category);
-    await Promise.all(
-      tags.map(async tag => {
-        await articleModel.addTagArticle(tag, res.insertId);
-      })
-    );
     if (res.affectedRows === 1) {
-      return await getArticleDetail(res.insertId);
+      const tagRes = await tagModel.addTagArticle(tag, res.insertId);
+      if (tagRes) {
+        return await getArticleDetail(res.insertId);
+      }
     }
     return {};
   } catch (error) {
@@ -84,7 +124,7 @@ const insertArticle = async (
 const deleteArticle = async (id: number) => {
   try {
     const res = await articleModel._delete(id);
-    await articleModel.deleteTagArticleById(id);
+    await tagModel.deleteTagArticleByArticleId(id);
     return res;
   } catch (error) {
     console.log("error", error);
@@ -95,10 +135,10 @@ const updateArticle = async (
   id: number,
   title: string,
   content: string,
-  tags?: Array<string>
+  cate: string
 ) => {
   try {
-    const res = await articleModel.update(id, title, content);
+    const res = await articleModel.update(id, title, content, cate);
     if (res.affectedRows === 1) {
       return await getArticleDetail(id);
     }
@@ -111,5 +151,7 @@ export default {
   getArticleDetail,
   insertArticle,
   deleteArticle,
-  updateArticle
+  updateArticle,
+  getBriefList,
+  getCurrent
 };

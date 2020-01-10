@@ -9,4 +9,15 @@ const getTagNameList = async () => {
   }
 };
 
-export default { getTagNameList };
+const addTagArticle = async (tagName: string, articleId: number) => {
+  try {
+    const res = await tagModel.addTagArticle(tagName, articleId);
+    if (res.affectedRows === 1) {
+      return res;
+    }
+  } catch (error) {
+    console.log("error :", error);
+  }
+};
+
+export default { getTagNameList, addTagArticle };
