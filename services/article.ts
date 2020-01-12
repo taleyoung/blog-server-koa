@@ -8,7 +8,7 @@ interface ArticleModel {
   title: string;
   content: string;
   category: string;
-  updated_at: dayjs.ConfigType;
+  createdAt: dayjs.ConfigType;
   tags: { split: (arg0: string) => string[] };
 }
 
@@ -39,7 +39,7 @@ const getArticleList = async (
         title: item.title,
         content: item.content.slice(0, 60) + "...",
         category: item.category,
-        updatedAt: dayjs(item.updated_at).format("YYYY-MM-DD"),
+        updatedAt: dayjs(item.createdAt).format("YYYY-MM-DD"),
         tags: item.tags.split(",")
       });
     });
