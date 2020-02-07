@@ -92,7 +92,7 @@ const getArticleDetail = async (id: number) => {
       title: res[0].title,
       content: res[0].content,
       category: res[0].category,
-      updatedAt: dayjs(res[0].updated_at).format("YYYY-MM-DD HH:MM"),
+      updatedAt: dayjs(res[0].createdAt).format("YYYY-MM-DD HH:MM"),
       tags: res[0].tags.split(",")
     };
     return detail;

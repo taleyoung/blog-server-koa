@@ -22,7 +22,9 @@
     "mysql2": "^2.0.0",
     "nodemon": "^1.19.4",
     "path": "^0.12.7",
-    "ts-node": "^8.5.2"
+    "ts-node": "^8.5.2",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
   },
   "devDependencies": {
     "@types/node": "^12.12.7",
